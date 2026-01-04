@@ -181,8 +181,8 @@ def form_page():
 # ---------------- MATCH RESULT ----------------
 @app.post("/match", response_class=HTMLResponse)
 def match_result(
-    role: str = Form(...),
-    responsibilities: str = Form(...)
+        role: str = Form(...),
+        responsibilities: str = Form(...)
 ):
     result = compute_single_role_similarity(role, responsibilities)
 
@@ -296,3 +296,16 @@ def match_result(
                 <p class="meta">
                     Similarity Score: <b>{percent}%</b><br>
                     Required Threshold: <b>{threshold_pct}%</b>
+                </p>
+
+                <p class="explanation">{explanation}</p>
+            </div>
+
+            <div class="actions">
+                <a href="/" class="btn btn-secondary">Check Another Internship</a>
+                {"<a href='#' class='btn btn-primary'>Continue to Step 2</a>" if passed else ""}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
