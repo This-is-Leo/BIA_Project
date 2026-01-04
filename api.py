@@ -109,7 +109,7 @@ def form_page():
                 margin-bottom: 10px;
             }}
             h2 {{
-                color:/npm  #555;
+                color: #555;
                 font-weight: normal;
                 margin-top: 0;
             }}
@@ -295,4 +295,4 @@ def match_result(
 
                 <p class="meta">
                     Similarity Score: <b>{percent}%</b><br>
-                    Required Threshold: <b>{threshold_pct}%</b_
+                    Required Threshold: <b>{threshold_pct}%</b>
