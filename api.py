@@ -1,16 +1,84 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
+from fastapi.exceptions import RequestValidationError
+
 from matcher import compute_single_role_similarity, build_role_cache
 from config import JOB_ROLES, SIMILARITY_THRESHOLD
 
 app = FastAPI(title="BIA Work Placement Pre-Approval Checker")
 
 
+# ---------------- STARTUP ----------------
 @app.on_event("startup")
 def startup():
     build_role_cache()
 
 
+# ---------------- VALIDATION ERROR HANDLER ----------------
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return HTMLResponse(
+        status_code=400,
+        content="""
+        <html>
+        <head>
+            <title>Input Required</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f6f9;
+                }
+                .container {
+                    max-width: 720px;
+                    margin: 50px auto;
+                    background: white;
+                    padding: 35px;
+                    border-radius: 12px;
+                    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+                }
+                h2 {
+                    color: #003366;
+                    margin-top: 0;
+                }
+                .warning {
+                    padding: 18px;
+                    border-radius: 10px;
+                    background-color: #fff3cd;
+                    border-left: 6px solid #f9a825;
+                    color: #856404;
+                    font-size: 15px;
+                }
+                .actions {
+                    margin-top: 30px;
+                }
+                .btn {
+                    text-decoration: none;
+                    padding: 12px 18px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    display: inline-block;
+                    background-color: #003366;
+                    color: white;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>BIA Work Placement – Input Required</h2>
+                <div class="warning">
+                    Internship responsibilities cannot be empty. Please paste the job responsibilities before submitting.
+                </div>
+                <div class="actions">
+                    <a href="/" class="btn">Go Back</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    )
+
+
+# ---------------- FORM PAGE ----------------
 @app.get("/", response_class=HTMLResponse)
 def form_page():
     roles_options = "".join(
@@ -41,7 +109,7 @@ def form_page():
                 margin-bottom: 10px;
             }}
             h2 {{
-                color: #555;
+                color:/npm  #555;
                 font-weight: normal;
                 margin-top: 0;
             }}
@@ -110,70 +178,12 @@ def form_page():
     """
 
 
+# ---------------- MATCH RESULT ----------------
 @app.post("/match", response_class=HTMLResponse)
 def match_result(
     role: str = Form(...),
     responsibilities: str = Form(...)
 ):
-    if not responsibilities.strip():
-        return """
-        <html>
-        <head>
-            <title>Input Required</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f6f9;
-                }
-                .container {
-                    max-width: 720px;
-                    margin: 50px auto;
-                    background: white;
-                    padding: 35px;
-                    border-radius: 12px;
-                    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-                }
-                h2 {
-                    color: #003366;
-                    margin-top: 0;
-                }
-                .warning {
-                    padding: 18px;
-                    border-radius: 10px;
-                    background-color: #fff3cd;
-                    border-left: 6px solid #f9a825;
-                    color: #856404;
-                    font-size: 15px;
-                }
-                .actions {
-                    margin-top: 30px;
-                }
-                .btn {
-                    text-decoration: none;
-                    padding: 12px 18px;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    display: inline-block;
-                    background-color: #003366;
-                    color: white;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h2>BIA Work Placement – Input Required</h2>
-                <div class="warning">
-                    Please paste the internship responsibilities before submitting the form.
-                </div>
-                <div class="actions">
-                    <a href="/" class="btn">Go Back</a>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-    # -----------------------------------------
-
     result = compute_single_role_similarity(role, responsibilities)
 
     score = result["cosine_similarity"]
@@ -285,17 +295,4 @@ def match_result(
 
                 <p class="meta">
                     Similarity Score: <b>{percent}%</b><br>
-                    Required Threshold: <b>{threshold_pct}%</b>
-                </p>
-
-                <p class="explanation">{explanation}</p>
-            </div>
-
-            <div class="actions">
-                <a href="/" class="btn btn-secondary">Check Another Internship</a>
-                {"<a href='#' class='btn btn-primary'>Continue to Step 2</a>" if passed else ""}
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+                    Required Threshold: <b>{threshold_pct}%</b_
