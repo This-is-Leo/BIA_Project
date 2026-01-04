@@ -115,6 +115,65 @@ def match_result(
     role: str = Form(...),
     responsibilities: str = Form(...)
 ):
+    if not responsibilities.strip():
+        return """
+        <html>
+        <head>
+            <title>Input Required</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f6f9;
+                }
+                .container {
+                    max-width: 720px;
+                    margin: 50px auto;
+                    background: white;
+                    padding: 35px;
+                    border-radius: 12px;
+                    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+                }
+                h2 {
+                    color: #003366;
+                    margin-top: 0;
+                }
+                .warning {
+                    padding: 18px;
+                    border-radius: 10px;
+                    background-color: #fff3cd;
+                    border-left: 6px solid #f9a825;
+                    color: #856404;
+                    font-size: 15px;
+                }
+                .actions {
+                    margin-top: 30px;
+                }
+                .btn {
+                    text-decoration: none;
+                    padding: 12px 18px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    display: inline-block;
+                    background-color: #003366;
+                    color: white;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>BIA Work Placement – Input Required</h2>
+                <div class="warning">
+                    Please paste the internship responsibilities before submitting the form.
+                </div>
+                <div class="actions">
+                    <a href="/" class="btn">Go Back</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    # -----------------------------------------
+
     result = compute_single_role_similarity(role, responsibilities)
 
     score = result["cosine_similarity"]
