@@ -1,0 +1,10 @@
+.idea/
+
+__pycache__/
+*.pyc
+
+.venv/
+venv/
+
+onnx_model/
+all-MiniLM-L6-v2_local/
